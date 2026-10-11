@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cook-Along Mode — Three Zones</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Instrument+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#121110;--panel:#1c1a18;--ink:#f3eee6;--mute:#b7aea0;--hot:#ffb347;--ok:#7bd88f;--bad:#ff6b5e;--line:#2f2b27;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:980px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:clamp(28px,6vw,46px);line-height:1.1;margin:8px 0}
+h2{font-size:22px;margin:40px 0 10px;color:var(--hot)}
+p{margin:8px 0}.mute{color:var(--mute)}
+.why{display:block;margin-top:6px;padding:8px 12px;border-left:3px solid var(--hot);background:#241f18;border-radius:0 8px 8px 0;font-size:14px;color:#e9d9bd}
+.why b{color:var(--hot)}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.card h3{margin:0 0 6px;font-size:17px}
+table{width:100%;border-collapse:collapse;font-size:14px;display:block;overflow-x:auto}
+td,th{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{color:var(--hot)}
+/* ===== TABLET ===== */
+.stage{container-type:inline-size;background:#000;border-radius:18px;padding:1.2cqw;border:2px solid #3a342e}
+.tab{position:relative;width:100%;aspect-ratio:16/10;background:var(--bg);border-radius:10px;overflow:hidden;font-size:3.6cqw;line-height:1.15;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.tab *{box-sizing:border-box}
+.bar{position:absolute;left:0;right:0;top:0;height:7cqw;display:flex;align-items:center;gap:1.5cqw;padding:0 2cqw;font-size:3.6cqw;color:var(--mute)}
+.chip{display:flex;align-items:center;gap:1cqw;border:.3cqw solid var(--line);border-radius:5cqw;padding:.6cqw 2cqw;white-space:nowrap;transition:.2s}
+.chip i{width:2cqw;height:2cqw;border-radius:50%;background:var(--ok)}
+.chip.listen{border-color:var(--hot);color:var(--ink)}.chip.listen i{background:var(--hot);animation:pl 1s infinite}
+.chip.err{border-color:var(--bad);color:var(--bad)}.chip.err i{background:var(--bad)}
+.chip.warn{border-color:var(--hot);color:var(--hot)}.chip.warn i{background:var(--hot)}
+.sp{flex:1}
+.now{position:absolute;left:2cqw;top:8cqw;width:61cqw;bottom:18cqw}
+.stepn{font-size:3.6cqw;color:var(--mute);letter-spacing:.3cqw}
+.verb{font-size:11cqw;font-weight:900;line-height:1;color:var(--hot);margin:1cqw 0 2cqw;letter-spacing:-.2cqw}
+.line{font-size:5.4cqw;font-weight:600;line-height:1.12}
+.dots{display:flex;gap:1cqw;margin-top:2.5cqw}.dots b{height:1.2cqw;flex:1;border-radius:1cqw;background:var(--line)}.dots b.on{background:var(--hot)}.dots b.d{background:#6b5a3d}
+.rail{position:absolute;right:2cqw;top:8cqw;width:31cqw;bottom:18cqw;background:var(--panel);border-radius:2cqw;padding:1.6cqw;display:flex;flex-direction:column}
+.scale{display:flex;gap:1cqw;margin-bottom:1.5cqw}
+.scale button{flex:1;font:800 4.2cqw system-ui;color:var(--ink);background:#2a2622;border:.3cqw solid var(--line);border-radius:1.5cqw;height:7cqw}
+.scale button.on{background:var(--hot);color:#1a1205;border-color:var(--hot)}
+.ing{display:flex;justify-content:space-between;font-size:4.2cqw;font-weight:600;padding:1cqw 0;border-bottom:.2cqw solid var(--line);transition:opacity .4s}
+.ing.faded{opacity:.28}.ing span:last-child{font-variant-numeric:tabular-nums}
+.ing.fl span:last-child{animation:fl 1.2s}
+.rl{font-size:3.6cqw;color:var(--mute);margin-bottom:.5cqw}
+.strip{position:absolute;left:17cqw;right:25.5cqw;bottom:1.5cqw;height:15cqw;display:flex;gap:1.2cqw;align-items:stretch}
+.t{background:var(--panel);border:.3cqw solid var(--line);border-radius:2cqw;padding:1cqw 1.6cqw;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.t.big{flex:2;border-color:var(--hot)}.t.sm{flex:1}
+.t .n{font-size:3.6cqw;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t .v{font-size:6.2cqw;font-weight:800;font-variant-numeric:tabular-nums}
+.t.big .v{font-size:8.5cqw;color:var(--hot)}
+.t.low .v{color:var(--bad)}
+.none{flex:1;display:flex;align-items:center;justify-content:center;color:var(--mute);font-size:3.6cqw;border:.3cqw dashed var(--line);border-radius:2cqw}
+.elb{position:absolute;bottom:1.5cqw;height:15cqw;border-radius:2.5cqw;display:flex;align-items:center;justify-content:center;font:900 5cqw system-ui;overflow:hidden;cursor:pointer;border:.4cqw solid #5a4a30;background:#2a2318;color:var(--ink)}
+.elb.back{left:2cqw;width:14cqw}.elb.next{right:2cqw;width:23cqw;background:var(--hot);color:#1a1205;border-color:var(--hot)}
+.elb .f{position:absolute;inset:0;background:rgba(255,255,255,.45);transform:scaleX(0);transform-origin:left}
+.elb.hold .f{animation:fill .3s linear forwards}
+.elb small{position:absolute;bottom:.6cqw;font:600 3cqw system-ui;opacity:.8}
+.toast{position:absolute;left:50%;bottom:18cqw;transform:translate(-50%,3cqw);background:#f3eee6;color:#1a1205;padding:1.4cqw 3cqw;border-radius:3cqw;font-size:4cqw;font-weight:700;display:flex;gap:3cqw;align-items:center;opacity:0;pointer-events:none;transition:.25s;white-space:nowrap;max-width:94%}
+.toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast button{font:800 4cqw system-ui;background:#1a1205;color:#f3eee6;border:0;border-radius:2cqw;padding:1cqw 3cqw}
+.ov{position:absolute;inset:0;background:rgba(18,17,16,.96);display:none;flex-direction:column;align-items:center;justify-content:center;gap:2cqw;padding:3cqw;text-align:center}
+.ov.on{display:flex}
+.alarm{animation:pu 1s infinite;background:#3a1612}
+.ac{display:flex;gap:2cqw;align-items:center;background:#2a1a17;border:.5cqw solid var(--bad);border-radius:3cqw;padding:2cqw 3cqw;width:90%}
+.ac .n{flex:1;font:900 8cqw system-ui;text-align:left}
+.ac button{font:900 5.4cqw system-ui;border:0;border-radius:2.5cqw;height:13cqw;padding:0 4cqw}
+.b1{background:#3a342e;color:var(--ink)}.b2{background:var(--ok);color:#06210d}
+.cam{position:absolute;right:2cqw;top:8cqw;width:12cqw;height:12cqw;border-radius:50%;border:.7cqw solid var(--ok);display:none;align-items:center;justify-content:center;font-size:7cqw;background:rgba(0,0,0,.6);z-index:3}
+.cam.on{display:flex;animation:pl 1s infinite}
+.cap{position:absolute;left:2cqw;top:7.5cqw;font-size:4cqw;color:var(--hot);font-weight:700;opacity:0;transition:.3s}
+.cap.on{opacity:1}
+.sim{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-top:12px}
+.sim button{font:600 14px system-ui;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 10px;min-height:48px}
+.sim button:active{background:#2a2622}
+.sim .h{grid-column:1/-1;color:var(--mute);font-size:13px;margin-top:4px}
+@keyframes pl{50%{opacity:.35}}@keyframes fill{to{transform:scaleX(1)}}
+@keyframes fl{0%,60%{color:var(--hot);transform:scale(1.15)}100%{transform:none}}
+@keyframes pu{50%{background:#5a1f18}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important}}
+.stats{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin:18px 0 6px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px}.stat b{display:block;font-size:30px;color:var(--hot);line-height:1.1}.stat span{font-size:13px;color:var(--mute)}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;display:flex;gap:8px;overflow-x:auto;padding:10px 0;margin:10px 0;background:rgba(18,17,16,.92);backdrop-filter:blur(8px)}nav a{white-space:nowrap;color:var(--ink);text-decoration:none;font-size:14px;font-weight:600;border:1px solid var(--line);border-radius:20px;padding:8px 14px;background:var(--panel)}nav a:active{background:var(--hot);color:#1a1205}
+h2[id]{scroll-margin-top:70px}
+.sb{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));counter-reset:f}.fr{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;position:relative;counter-increment:f}.fr:before{content:counter(f);position:absolute;top:10px;right:12px;font:900 22px system-ui;color:#4a3f2e}.fr .em{font-size:40px}.fr .mk{margin:8px 0;padding:10px;background:#000;border-radius:8px;font-weight:800;color:var(--hot);font-size:20px;text-align:center}.fr .mk.r{color:var(--bad)}.fr .mk.g{color:var(--ink);font-size:15px}.fr h3{margin:4px 0;font-size:16px}.fr p{font-size:14px;color:var(--mute);margin:4px 0}
+.tab.dim{filter:brightness(.45);transition:filter .6s}.tab.dim .rail{opacity:0}.tab.dim .now{width:94cqw}.tab{transition:filter .6s}
+.tab.dim .t.big .v{font-size:11cqw}
+.elb small{font-size:3.6cqw;bottom:.3cqw}.sw{overflow-x:auto;-webkit-overflow-scrolling:touch}.stage{min-width:620px}
+.pin{position:absolute;z-index:6;background:var(--hot);color:#1a1205;font:700 3.3cqw/1.2 system-ui;padding:1cqw 1.6cqw;border-radius:1.5cqw;max-width:30cqw;box-shadow:0 .5cqw 2cqw #000;animation:pn .4s both}@keyframes pn{from{opacity:0;transform:scale(.9)}}
+body{font-family:"Instrument Sans",system-ui,sans-serif}.tab,.tab button{font-family:system-ui,sans-serif}
+h1,h2,.stat b{font-family:Fraunces,Georgia,serif;font-weight:700}
+.card,.fr{background:none;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:12px 4px}
+.stat{background:none;border:0;border-left:2px solid var(--hot);border-radius:0;padding:4px 12px}
+.sim button,nav a{border-radius:3px}
+.sim button{display:flex;align-items:center;justify-content:center;gap:8px}.ic{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.fi{width:40px;height:40px;color:var(--hot);margin-bottom:6px}.fi .ic{width:40px;height:40px;stroke-width:1.6}
+.elb{flex-direction:column;line-height:1}.elb small{position:static;white-space:nowrap;font-size:3.6cqw;margin-top:.6cqw}
+html{-webkit-text-size-adjust:100%}main{max-width:1040px}p{max-width:72ch}.why{max-width:72ch}
+h1{max-width:24ch;letter-spacing:-.02em}
+h2{font-size:clamp(22px,3.6vw,30px);color:var(--ink);border-top:1px solid var(--line);padding-top:22px;margin:52px 0 14px}h2:before{content:"";display:inline-block;width:10px;height:10px;background:var(--hot);margin-right:10px;border-radius:2px}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute)}td{white-space:normal;vertical-align:top;min-width:110px}
+nav a{padding:12px 16px}
+button:focus-visible,a:focus-visible{outline:3px solid var(--hot);outline-offset:2px}
+.stage{min-width:520px;padding:clamp(6px,1.2vw,14px)}
+.cap{left:1.5cqw;right:1.5cqw;top:.9cqw;height:5.2cqw;display:flex;align-items:center;justify-content:center;background:var(--hot);color:#1a1205;border-radius:3cqw;z-index:4;font-size:3.6cqw;font-weight:700;white-space:nowrap;overflow:hidden}
+.sw:before{content:"Scroll sideways inside the frame \2192";display:none;font-size:12px;color:var(--mute);margin-bottom:6px}
+@media(max-width:700px){.sw:before{display:block}}
+@media(max-width:600px){main{padding:14px 14px 48px}.stat b{font-size:24px}h2{margin-top:40px}}
+</style></head><body><main>
+<p class="mute" style="margin:0">Nielsen assignment · Brief 2 · Cook-Along Mode</p>
+<h1>Three Zones: a kitchen screen you read with your eyes and operate with your elbow.</h1>
+<p>The tablet leans on a counter at 4 ft. The screen is divided by <b>how far you can see</b> and <b>what part of your body is free</b>, not by content type. Try it below: every input works without a clean fingertip.</p>
+
+<div class="stats"><div class="stat"><b>4 inputs</b><span>voice, air gesture, elbow, proximity: each covers another’s failure</span></div><div class="stat"><b>64 pt verb</b><span>≈ 44 arcmin at 4 ft, almost 3× the 16′ standard minimum</span></div><div class="stat"><b>1 s glance</b><span>one verb, ≤7 words per step</span></div><div class="stat"><b>6 edge cases</b><span>each designed, each triggerable below</span></div></div>
+<h2 style="margin-top:24px">How this answers your five criteria</h2>
+<div class="grid">
+<div class="card"><h3>1 · The “Why” behind the “What”</h3>Five physical truths drive every choice, and rejected options are listed. <a href="#fp" style="color:var(--hot)">First principles</a> · <a href="#rej" style="color:var(--hot)">Rejected</a></div>
+<div class="card"><h3>2 · Environmental empathy</h3>Noise, steam, glare, grease and a sliding tablet, each mapped to a design response. <a href="#env" style="color:var(--hot)">Audit</a></div>
+<div class="card"><h3>3 · Information hierarchy</h3>A 1 s / 3 s / 10 s glance model and a list of what I deleted. <a href="#signal" style="color:var(--hot)">Signal vs noise</a></div>
+<div class="card"><h3>4 · Interaction instinct</h3>Four input channels plus a motion and sound spec. <a href="#story" style="color:var(--hot)">Storyboard</a> · <a href="#motion" style="color:var(--hot)">Motion</a></div>
+<div class="card"><h3>5 · Attention to detail</h3>Six edge-case screens plus nine small details. <a href="#edge" style="color:var(--hot)">Edge cases</a> · <a href="#detail" style="color:var(--hot)">Details</a></div>
+</div>
+<nav><a href="#proto">Prototype</a><a href="#fp">First principles</a><a href="#env">Environment</a><a href="#signal">Hierarchy</a><a href="#story">Storyboard</a><a href="#edge">Edge cases</a><a href="#motion">Motion</a><a href="#detail">Details</a><a href="#type">Type maths</a></nav>
+<nav style="display:none"><a href="#proto">Prototype</a><a href="#fp">First principles</a><a href="#story">Storyboard</a><a href="#edge">Edge cases</a><a href="#type">Type maths</a></nav>
+<h2 id="proto">Prototype (interactive)</h2>
+<div class="sw"><div class="stage"><div class="tab" id="tab">
+ <div class="bar"><div class="chip" id="mic"><i></i><span id="micT">Voice: say “Chef…”</span></div><div class="chip" id="camc"><i></i><span id="camT">Hand sensor ready</span></div><div class="sp"></div><span id="clock">Pasta · serves 2</span></div>
+ <div class="cap" id="cap"></div>
+ <div class="now"><div class="stepn" id="sn"></div><div class="verb" id="vb"></div><div class="line" id="ln"></div><div class="dots" id="dots"></div></div>
+ <div class="rail"><div class="scale" id="sc"></div><div class="rl">NEEDED NOW</div><div id="ings"></div></div>
+ <div class="strip" id="strip"></div>
+ <div class="elb back" id="eb" data-a="back"><div class="f"></div>BACK<small>hold</small></div>
+ <div class="elb next" id="en" data-a="next"><div class="f"></div>NEXT ›<small>hold 0.3 s</small></div>
+ <div class="toast" id="toast"><span id="tt"></span><button id="tu">UNDO</button></div>
+ <div class="cam" id="ring">✋</div>
+ <div class="ov" id="ovA"></div>
+ <div class="ov" id="ovC"><div style="font-size:9cqw;font-weight:900">📞 Mom is calling</div><div style="font-size:5cqw;color:var(--hot)">Timers keep running · 2 active</div><div style="font-size:4.4cqw;color:var(--mute)">Recipe returns the moment the call ends</div></div>
+</div></div></div>
+<div class="sim">
+ <button data-s="tour" style="grid-column:1/-1;background:var(--hot);color:#1a1205;font-weight:800">▶ Auto-play the 25-second tour</button><button data-s="notes" style="grid-column:1/-1">🏷 Show / hide “Why” annotations on the UI</button>
+ <div class="h">Touch: hold the corner targets 0.3 s (fill ring). Or simulate the non-touch inputs:</div>
+ <button data-s="next">🎙 “Chef, next”</button><button data-s="double">🎙 “Chef, double it”</button><button data-s="palm">✋ Palm = pause timers</button><button data-s="swipe">👋 Air swipe = next</button>
+ <div class="h">Edge cases:</div>
+ <button data-s="noise">🌀 Extractor fan drowns voice</button><button data-s="steam">♨️ Steam blocks camera</button><button data-s="false">⚠️ False trigger (TV said “next”)</button><button data-s="two">⏰ Two timers ring at once</button><button data-s="call">📞 Phone call mid-cook</button><button data-s="away">🚶 Walk away / come back</button><button data-s="reset">↺ Reset demo</button>
+</div>
+<p class="mute" style="font-size:13px">Demo timers run 20× faster so you can see alarms. Desktop: → and ← keys act as the elbow targets. On a phone, rotate to landscape (or open on a tablet) for the full-size view.</p>
+
+<h2 id="fp">0 · First principles: what is actually true?</h2>
+<p>I started by deleting the idea of a “recipe page” and asking what is physically true about a person cooking. Every design decision below is derived from one of these five facts, not borrowed from a pattern library.</p>
+<table><tr><th>Fundamental truth</th><th>What follows</th><th>Design decision</th></tr>
+<tr><td><b>1.</b> Capacitive screens need a clean, dry fingertip. Flour, oil and water break this, and dirty glass is also a hygiene problem.</td><td>The fingertip is the wrong input. Free body parts are the forearm, wrist, voice and eyes.</td><td>Voice and air gestures first; elbow-sized targets as the reliable fallback.</td></tr>
+<tr><td><b>2.</b> Eyes belong to the food. A cook’s glance at the screen lasts about a second, from 3–5 ft.</td><td>Legibility is an angle, not a point size. Each glance can carry one idea.</td><td>Size type by arcminutes at 4 ft; one verb per step, ≤7 words; everything else hidden until asked.</td></tr>
+<tr><td><b>3.</b> The kitchen attacks every channel, each in a different way: noise kills voice, steam kills camera, hands in the way kill touch.</td><td>No single input can be reliable. Independent channels fail independently.</td><td>A fallback ladder, where every failure state names the next working channel on screen.</td></tr>
+<tr><td><b>4.</b> Cooking is a race against time. Only timers have hard deadlines, and missing one burns food.</td><td>Timers are the one element allowed to interrupt, and they must be identified by what is cooking.</td><td>Auto-start, name by food, soonest-first sizing, full-screen takeover on ring.</td></tr>
+<tr><td><b>5.</b> Any sensing system, voice and gesture especially, will sometimes be wrong.</td><td>Reliability comes from cheap recovery, not perfect recognition.</td><td>300 ms hold filter, 5 s undo on every hands-free action, visible “what I heard” caption.</td></tr></table>
+<p><b>Sizing the elbow target from first principles:</b> a fingertip target needs roughly 9–10 mm. A forearm or elbow contact patch is several times bigger and far less precise, so I assume (estimate, to validate in testing) a ~35 mm minimum. On an 11″ tablet that gives Next at about 2.1″ × 1.4″ and Back at about 1.3″ × 1.4″, placed on the lowest edge where the arm already rests.</p>
+<span class="why"><b>Why this matters:</b> a standard recipe page assumes seated reading, clean hands and full attention. Remove all three and none of its layout survives, which is why this isn’t a restyled recipe page.</span>
+
+<h2>1 · Assumptions</h2>
+<div class="grid">
+<div class="card"><h3>Device</h3>11″ landscape tablet propped on a counter. Fixed, so it can use the front camera and mic continuously.</div>
+<div class="card"><h3>Distance</h3>Cook stands 3–5 ft away; design for the far end, <b>4 ft</b>. Arm reach to screen is not guaranteed.</div>
+<div class="card"><h3>Kitchen</h3>Noisy (chimney fan 60–70 dB), steamy, glare from a window or tube light, one or two pans going.</div>
+<div class="card"><h3>User</h3>Home cook, often mid-task with wet or floury hands, switching between Hindi/English phrases. Cooks one recipe at a time but runs 2–4 timers.</div>
+</div>
+
+<h2>2 · Three principles</h2>
+<div class="grid">
+<div class="card"><h3>① One thing, one verb</h3>Main view shows only the current step, ≤7 words, led by a verb. <span class="why"><b>Why:</b> a glance is ~1 s; a verb is the one word that tells you what your hands should do.</span></div>
+<div class="card"><h3>② Never one input</h3>Voice → gesture → elbow target. Each failure state names the next fallback on screen. <span class="why"><b>Why:</b> fans, steam and gloves each break a different channel; none breaks all.</span></div>
+<div class="card"><h3>③ Cheap to undo</h3>Every hands-free action gets a 5 s undo. <span class="why"><b>Why:</b> hands-free input will misfire; recoverable errors beat perfect recognition.</span></div>
+</div>
+
+<h2>3 · Layout logic: the zones</h2>
+<table><tr><th>Zone</th><th>Where</th><th>Job</th><th>Why there</th></tr>
+<tr><td>NOW</td><td>Left 60%, top</td><td>Verb 64pt + 36pt line + progress</td><td>Eyes land top-left first; the largest type earns the best real estate.</td></tr>
+<tr><td>NEEDED NOW</td><td>Right rail</td><td>Only this step’s ingredients, scaled</td><td>Secondary info; faded when irrelevant, so no scrolling and no 12-line ingredient list.</td></tr>
+<tr><td>TIMERS</td><td>Bottom strip</td><td>Soonest = large card; rest = compact cards, named by food (“Pasta”)</td><td>Peripheral vision catches colour change without turning your head from the pan.</td></tr>
+<tr><td>ELBOWS</td><td>Bottom corners</td><td>BACK (14% w) / NEXT (23% w), ≥ 1.3″ tall</td><td>Lowest edge sits at counter height, so a forearm or wrist reaches it without lifting a hand. NEXT is bigger because it is ~85% of presses. Never in the centre, so no accidental brush while reaching for the pan.</td></tr></table>
+
+<h2>4 · Non-touch interaction ladder</h2>
+<div class="grid">
+<div class="card"><h3>🎙 Voice (primary)</h3>“Chef, next / back / double it / start timer”. Pill turns amber while listening and prints what it heard, so users trust it. Hindi/English aliases (“agla”).</div>
+<div class="card"><h3>✋ Air gesture</h3>Open palm = pause timers; horizontal swipe = next/back. A ring shows the hand is detected before the action fires.</div>
+<div class="card"><h3>💪 Elbow hold</h3>300 ms hold with a fill ring. Short enough to feel instant, long enough to ignore a graze. 5 s undo covers the rest.</div>
+<div class="card"><h3>👁 Proximity</h3>Walk away: screen dims, timers stay large. Return: full brightness, step re-announced in the voice caption.</div>
+</div>
+
+<h2 id="story">Storyboard: non-touch logic in 4 frames</h2>
+<div class="sb">
+<div class="fr"><div class="em">🙌🥖</div><h3>Hands in dough</h3><p>Cook is 4 ft away, hands floury. They read the step with one glance.</p><div class="mk">KNEAD</div><p><b>Why:</b> verb first, no touch needed.</p></div>
+<div class="fr"><div class="em">🎙</div><h3>“Chef, next”</h3><p>Mic pill turns amber and prints what it heard before acting.</p><div class="mk g">Heard: “Chef, next” → step 3</div><p><b>Why:</b> visible trust, so no guessing if it listened.</p></div>
+<div class="fr"><div class="em">🌀</div><h3>Fan on, voice fails</h3><p>Screen says what to do instead, not just “error”.</p><div class="mk r">Hold NEXT corner</div><p><b>Why:</b> failure names the next channel.</p></div>
+<div class="fr"><div class="em">💪</div><h3>Elbow hold + undo</h3><p>Fill ring completes in 0.3 s; a 5 s UNDO toast covers mistakes.</p><div class="mk g">Step 3 · UNDO</div><p><b>Why:</b> intent filter, then cheap recovery.</p></div>
+</div>
+<span class="why"><b>Rule across all frames:</b> every action gets visual and audio confirmation, because haptics are useless to a forearm.</span>
+
+<h2 id="hard">5 · Hard constraints, solved</h2>
+<div class="grid">
+<div class="card"><h3>Many timers</h3>Auto-start on entering a step (with undo). Max 1 large + the rest compact. On ring: full-screen takeover, pulse + sound + two giant buttons (+1 min / Done). Two rings: stacked, each independent.<span class="why"><b>Why:</b> naming by food avoids “which Timer 2?”; takeover prevents burnt garlic.</span></div>
+<div class="card"><h3>Scaling</h3>×1 ×2 ×3 at top of rail, or “Chef, double it”. Changed numbers flash amber for 1 s. Timers do <i>not</i> change, and the interface says so when scale changes cooking time.<span class="why"><b>Why:</b> instant visible feedback, with no modal and no keyboard.</span></div>
+<div class="card"><h3>Cognitive load</h3>Progressive disclosure: only this step’s ingredients, steps ≤7 words, detail on voice “Chef, details”.</div>
+</div>
+
+<h2 id="env">Environmental audit: threat → physics → response</h2>
+<table><tr><th>Threat</th><th>What it does</th><th>Design response</th></tr>
+<tr><td>Chimney fan (assumed 60–70 dB)</td><td>Masks speech consonants</td><td>Short wake word, visible “what I heard”, instant fallback to elbow</td></tr>
+<tr><td>Steam</td><td>Fogs the lens, hides the hand</td><td>Camera-blocked state; gestures are optional, never required</td></tr>
+<tr><td>Window or tube-light glare</td><td>Washes out low-contrast text</td><td>Off-white on charcoal (~16:1), all text ≈7:1 or better, weight 800–900 for key words</td></tr>
+<tr><td>Oil and water on glass</td><td>Smudges, mis-taps</td><td>No small icons or thin strokes; only huge targets</td></tr>
+<tr><td>Tablet slides on a wet counter</td><td>Elbow press pushes it away</td><td>Targets on the lowest edge (force pushes into the counter); recommend a rubber-foot stand; hold needs no precision</td></tr></table>
+
+<h2 id="signal">Signal over noise: the glance model</h2>
+<div class="grid"><div class="card"><h3>1 second</h3>Verb in amber. Tells the hands what to do.</div><div class="card"><h3>3 seconds</h3>The one-line step and this step’s ingredients with amounts.</div><div class="card"><h3>10 seconds</h3>Timers and progress dots: how long, and how far through.</div></div>
+<p><b>Deleted from a normal recipe page:</b> hero photo, author story, ratings and reviews, nutrition, comments, ads, the full ingredient list and every future step. All still exist; they are one voice command away (“Chef, details”).</p>
+<span class="why"><b>Why:</b> every element on screen must answer “will this change what my hands do in the next 10 seconds?” If not, it is noise.</span>
+
+<h2 id="rej">Options I rejected, and why</h2>
+<table><tr><th>Option</th><th>Why not</th></tr>
+<tr><td>Voice only</td><td>One noisy fan breaks the whole product</td></tr>
+<tr><td>Bigger touch buttons only</td><td>Wet or floury fingers still fail; it’s the same input</td></tr>
+<tr><td>Smartwatch remote</td><td>Hands are the problem, and a watch needs them</td></tr>
+<tr><td>Auto-advance by sensing the food</td><td>Cook, not software, owns the pace; a wrong guess burns dinner</td></tr>
+<tr><td>Cloud camera processing</td><td>Privacy in a home kitchen; hand detection runs on-device with an indicator light</td></tr></table>
+
+<h2 id="edge">6 · Edge cases (all in the prototype)</h2>
+<table><tr><th>Case</th><th>What the user sees</th><th>Why</th></tr>
+<tr><td>Voice unrecognised</td><td>Red mic, “Didn’t catch that — hold NEXT corner”</td><td>Tells you the next-best channel, not just “error”.</td></tr>
+<tr><td>Camera blocked</td><td>Amber “Steam on camera — voice & elbow still on”</td><td>Degrades gracefully; reassures.</td></tr>
+<tr><td>False trigger</td><td>Step advances, toast “Heard ‘next’ · UNDO” 5 s</td><td>Act fast, recover cheaply.</td></tr>
+<tr><td>Two timers end</td><td>Stacked alarm cards, each dismissed separately</td><td>No ambiguity about which pan.</td></tr>
+<tr><td>Accidental elbow</td><td>Fill ring cancels if released &lt;300 ms</td><td>Intent filter without a confirm dialog.</td></tr>
+<tr><td>Phone call / lock</td><td>Call overlay: “Timers keep running”; alarms still break through</td><td>Interruption must never kill a timer.</td></tr></table>
+
+<h2 id="motion">Motion and sound language</h2>
+<table><tr><th>Event</th><th>Motion / sound</th><th>Timing</th><th>Why</th></tr>
+<tr><td>Step change</td><td>New step slides in from the right</td><td>220 ms ease-out</td><td>Direction says “forward”; fast enough not to stall hands</td></tr>
+<tr><td>Elbow hold</td><td>Fill ring across the button</td><td>300 ms linear</td><td>Shows progress, so a graze visibly fails</td></tr>
+<tr><td>Quantity change</td><td>Changed numbers flash amber and scale</td><td>1.2 s</td><td>Eye is drawn to what changed</td></tr>
+<tr><td>Hands-free action</td><td>Toast with UNDO</td><td>5 s</td><td>Window to catch a misfire</td></tr>
+<tr><td>Timer ends</td><td>Red pulse takeover + two 880 Hz beeps</td><td>1 s loop until dismissed</td><td>Sound reaches you when eyes are elsewhere</td></tr>
+<tr><td>Walk away</td><td>Dim, hide rail, enlarge timers</td><td>600 ms</td><td>Saves glare; keeps the one thing worth reading from afar</td></tr></table>
+<p class="mute">Sound language: soft tick = confirmed; double beep = timer. Reduced-motion users get the same states with no animation.</p>
+
+<h2 id="detail">Details I sweated</h2>
+<div class="grid">
+<div class="card">BACK is dimmed on step 1; NEXT becomes DONE ✓ on the last step and ends with “Enjoy”.</div>
+<div class="card">Scaling mid-cook only changes remaining steps; used ingredients stay ticked.</div>
+<div class="card">“+1 min” can repeat; an alarm never auto-dismisses.</div>
+<div class="card">Screen never sleeps while a timer runs; locks 10 min after the last one.</div>
+<div class="card">Setting to mirror the elbow targets for left-handed cooks.</div>
+<div class="card">No colour-only signals: every state also has a word or icon.</div>
+<div class="card">Hindi/English voice aliases (“agla”, “peechhe”).</div>
+<div class="card">Voice commands run on-device, so they work with no Wi-Fi.</div>
+<div class="card">Camera indicator light and a one-tap off for privacy.</div>
+</div>
+
+<h2 id="type">7 · Type, colour, and the 4-ft maths</h2>
+<p>Legibility is an angle, not a point size: height = 2 × distance × tan(angle ÷ 2). A common HF standard is ≥16 arcmin for text; at 48 in that is 0.22 in cap height. We then aim higher for the things that matter.</p>
+<table><tr><th>Element</th><th>Size</th><th>Cap height</th><th>Angle @ 4 ft</th></tr>
+<tr><td>Verb</td><td>64 pt</td><td>0.62 in</td><td>≈ 44′</td></tr>
+<tr><td>Step line</td><td>36 pt</td><td>0.35 in</td><td>≈ 25′</td></tr>
+<tr><td>Ingredients</td><td>28 pt</td><td>0.27 in</td><td>≈ 19′</td></tr>
+<tr><td>Minimum anywhere</td><td>24 pt</td><td>0.23 in</td><td>≈ 17′ ✓</td></tr></table>
+<p><b>Colour:</b> off-white <code>#F3EEE6</code> on charcoal <code>#121110</code>, not pure white on black, to cut glare and halation. One accent (amber <code>#FFB347</code>) means “act now”; red = urgent only; green = done. Colour is never the sole signal: every state also has a word or icon. Heavy weight (800–900) on the verb survives steam and window glare. Fixed positions: NEXT never moves, so muscle memory forms by the 2nd step.</p>
+<p><b>Feedback without haptics:</b> sound (soft tick on action, loud alarm), colour pulse, and motion (step slides left). Respects reduced-motion.</p>
+
+<h2>8 · Success metrics (how I’d test)</h2>
+<div class="grid"><div class="card">Step advance with wet hands ≤ 2 s, ≥ 95% success</div><div class="card">False-trigger undo rate &lt; 5% of advances</div><div class="card">Zero missed timers across a 30-min cook (diary + log)</div><div class="card">Legibility check: read verb at 5 ft in glare, 10/10 users</div></div>
+</main>
+<script>
+const $=id=>document.getElementById(id),q=s=>document.querySelector(s);
+const S=[
+{v:'BOIL',l:'Boil salted water',i:[['Water',2,'L'],['Salt',1,'tbsp']],t:['Water',480]},
+{v:'COOK',l:'Add pasta, stir',i:[['Pasta',200,'g']],t:['Pasta',600]},
+{v:'SIZZLE',l:'Garlic into hot oil',i:[['Oil',2,'tbsp'],['Garlic',4,'cloves']],t:['Garlic',90]},
+{v:'SIMMER',l:'Tomatoes, salt, 5 minutes',i:[['Tomatoes',400,'g'],['Salt',1,'tsp']],t:['Sauce',300]},
+{v:'TOSS',l:'Pasta into sauce, add basil',i:[['Basil',10,'leaves']]},
+{v:'SERVE',l:'Plate it. Eat it hot.',i:[]}];
+let st,tmr=null,undoSnap=null,ttimer,mT;
+function init(){$('tab').classList.remove('dim');st={step:0,scale:1,timers:[],paused:false};undoSnap=null;ovC.classList.remove('on');setMic('');setCam('');go(0,true)}
+const ovC=$('ovC'),ovA=$('ovA');
+function fmt(n){return n>=60?Math.floor(n/60)+':'+String(n%60).padStart(2,'0'):'0:'+String(n).padStart(2,'0')}
+function amt(n){const x=n*st.scale;return +(x%1?x.toFixed(1):x)}
+function snap(){return JSON.stringify(st)}
+function go(d,silent,src){
+ if(!silent)undoSnap=snap();
+ const n=Math.max(0,Math.min(S.length-1,st.step+(silent?0:d)));
+ const moved=n!==st.step;if(!silent&&!moved&&d>0)toast('Enjoy your meal 🍝',false);st.step=n;
+ const s=S[n];
+ if(!silent&&moved&&d>0&&s.t&&!st.timers.find(t=>t.name===s.t[0])){st.timers.push({name:s.t[0],left:s.t[1],ack:false});toast(s.t[0]+' timer started · '+fmt(s.t[1]),true)}
+ else if(!silent&&moved&&src!=='voice'){beep(500,.05)}
+ render(moved&&!silent)}
+function render(slide){
+ const s=S[st.step];
+ $('clock').textContent='Pasta · serves '+2*st.scale;$('eb').style.opacity=st.step?1:.3;$('en').innerHTML='<div class="f"></div>'+(st.step===S.length-1?'DONE ✓':'NEXT ›')+'<small>hold 0.3 s</small>';
+ $('sn').textContent='STEP '+(st.step+1)+' OF '+S.length;
+ $('vb').textContent=s.v;$('ln').textContent=s.l;
+ if(slide){const n=q('.now');n.animate([{transform:'translateX(4cqw)',opacity:0},{transform:'none',opacity:1}],{duration:220,easing:'ease-out'})}
+ $('dots').innerHTML=S.map((_,i)=>'<b class="'+(i===st.step?'on':i<st.step?'d':'')+'"></b>').join('');
+ $('sc').innerHTML=[1,2,3].map(x=>'<button class="'+(x===st.scale?'on':'')+'" data-x="'+x+'">×'+x+'</button>').join('');
+ const all=[].concat(...S.map(x=>x.i));
+ let rows=s.i.map(a=>'<div class="ing fl"><span>'+a[0]+'</span><span>'+amt(a[1])+' '+a[2]+'</span></div>').join('');
+ if(!s.i.length)rows='<div class="ing"><span>All done ✓</span></div>';
+ const done=S.slice(0,st.step).reduce((a,x)=>a+x.i.length,0);
+ if(done)rows+='<div class="ing faded"><span>✓ '+done+' used</span><span></span></div>';
+ $('ings').innerHTML=rows;
+ strip()}
+function strip(){
+ const T=st.timers.filter(t=>t.left>0).sort((a,b)=>a.left-b.left);
+ $('strip').innerHTML=T.length?T.map((t,i)=>'<div class="t '+(i?'sm':'big')+(t.left<=30?' low':'')+'"><div class="n">'+(st.paused?'⏸ ':'')+t.name+'</div><div class="v">'+fmt(t.left)+'</div></div>').join(''):'<div class="none">No timers running</div>';
+ const R=st.timers.filter(t=>t.left<=0&&!t.ack);
+ if(R.length){ovA.className='ov on alarm';ovA.innerHTML='<div style="font:900 6cqw system-ui;color:var(--bad)">⏰ TIME’S UP</div>'+R.map(t=>'<div class="ac"><div class="n">'+t.name+'</div><button class="b1" data-p="'+t.name+'">+1 min</button><button class="b2" data-d="'+t.name+'">DONE</button></div>').join('')}
+ else ovA.className='ov'}
+setInterval(()=>{if(st.paused)return;let ring=false;st.timers.forEach(t=>{if(t.left>0){t.left=Math.max(0,t.left-20);if(t.left===0)ring=true}});if(ring)alarm();strip()},1000);
+let ac;function beep(f,d){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;g.gain.value=.08;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d)}catch(e){}}
+function alarm(){beep(880,.25);setTimeout(()=>beep(880,.25),350)}
+ovA.onclick=e=>{const d=e.target.dataset;if(d.d){st.timers.find(t=>t.name===d.d).ack=true}if(d.p){const t=st.timers.find(t=>t.name===d.p);t.left=60}strip()};
+function toast(m,u){$('tt').textContent=m;$('tu').style.display=u?'':'none';$('toast').classList.add('on');clearTimeout(ttimer);ttimer=setTimeout(()=>$('toast').classList.remove('on'),5000)}
+$('tu').onclick=()=>{if(undoSnap){st=JSON.parse(undoSnap);undoSnap=null;render(false)}$('toast').classList.remove('on')};
+$('sc').onclick=e=>{const x=e.target.dataset.x;if(x)setScale(+x)};
+function setScale(x){undoSnap=snap();st.scale=x;render(false);if(x>1)toast('Quantities ×'+x+' · cooking time unchanged',true)}
+function setMic(c,t){const m=$('mic');m.className='chip '+c;$('micT').textContent=t||'Voice: say “Chef…”'}
+function setCam(c,t){const m=$('camc');m.className='chip '+c;$('camT').textContent=t||'Hand sensor ready'}
+function cap(t){const c=$('cap');c.textContent=t;c.classList.add('on');clearTimeout(mT);mT=setTimeout(()=>c.classList.remove('on'),2200)}
+function voice(t,fn){setMic('listen','Listening…');setTimeout(()=>{cap('Heard: “'+t+'”');setMic('','Voice: say “Chef…”');fn()},700)}
+// elbow hold
+document.querySelectorAll('.elb').forEach(b=>{let h;const stop=()=>{clearTimeout(h);b.classList.remove('hold')};
+ b.addEventListener('pointerdown',e=>{e.preventDefault();b.classList.add('hold');h=setTimeout(()=>{b.classList.remove('hold');go(b.dataset.a==='next'?1:-1);},300)});
+ ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,stop))});
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(1);if(e.key==='ArrowLeft')go(-1)});
+const A={
+next:()=>voice('Chef, next',()=>go(1,false,'voice')),
+double:()=>voice('Chef, double it',()=>setScale(2)),
+palm:()=>{$('ring').classList.add('on');cap('Hand detected ✋ — pausing');setTimeout(()=>{$('ring').classList.remove('on');st.paused=!st.paused;toast(st.paused?'Timers paused':'Timers resumed',false);strip()},700)},
+swipe:()=>{$('ring').classList.add('on');cap('Swipe detected 👋');setTimeout(()=>{$('ring').classList.remove('on');go(1)},600)},
+noise:()=>{setMic('listen','Listening…');setTimeout(()=>{setMic('err','Fan too loud');cap('Didn’t catch that — hold NEXT corner');setTimeout(()=>setMic(''),3500)},900)},
+steam:()=>{setCam('warn','Steam on camera');cap('Voice & elbow targets still on');setTimeout(()=>setCam(''),4000)},
+false:()=>{cap('Heard: “next” (TV?)');go(1,false,'voice');toast('Heard “next” · wasn’t you?',true)},
+two:()=>{[['Water',0],['Pasta',0]].forEach(([n])=>{let t=st.timers.find(x=>x.name===n);if(!t){t={name:n,left:0,ack:false};st.timers.push(t)}t.left=1;t.ack=false});alarm()},
+call:()=>{ovC.classList.add('on');setTimeout(()=>ovC.classList.remove('on'),3500)},
+away:()=>{const t=$('tab'),d=t.classList.toggle('dim');cap(d?'Walked away: dimmed, timers enlarged':'Welcome back · Step '+(st.step+1)+': '+S[st.step].v)},
+notes:()=>{const o=q('.pin');if(o){document.querySelectorAll('.pin').forEach(x=>x.remove());return}const P=[['left:3cqw;top:38cqw','① NOW: eyes land top-left first. 64pt verb ≈ 44′ at 4 ft'],['right:3cqw;top:40cqw','② Only this step’s ingredients. Scaling changes numbers, never layout'],['left:19cqw;bottom:17cqw;max-width:36cqw','③ Soonest timer big, rest compact. Named by food'],['right:2cqw;bottom:17cqw;max-width:25cqw','④ Lowest edge: forearm reach. Hold 300 ms filters grazes']];P.forEach(([s,t])=>{const d=document.createElement('div');d.className='pin';d.style.cssText=s;d.textContent=t;$('tab').appendChild(d)})},
+tour:()=>{A.reset();const k=x=>setTimeout.bind(null);[[900,'next'],[3300,'double'],[5800,'noise'],[8800,'swipe'],[11000,'palm'],[12800,'palm'],[14800,'two'],[18500,'ack'],[19500,'away'],[22000,'away'],[24000,'notes']].forEach(([t,n])=>setTimeout(()=>{if(n==='ack'){st.timers.forEach(x=>x.ack=true);strip()}else A[n]()},t))},
+reset:init};
+document.querySelector('.sim').onclick=e=>{const s=e.target.dataset.s;if(s)A[s]()};
+(function(){const h=[...document.querySelectorAll('h2')].find(x=>x.textContent.startsWith('How this answers')),f=document.getElementById('fp');if(h&&f)f.before(h,h.nextElementSibling)})();
+document.querySelectorAll('.fr .em').forEach(x=>x.remove());document.querySelectorAll('.sim button,main h3,main h2').forEach(el=>{if(!el.children.length)el.textContent=el.textContent.replace(/[\p{Extended_Pictographic}\uFE0F]\s*/gu,'')});
+(function(){const I={mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',hand:'<path d="M8 13V6a1.5 1.5 0 0 1 3 0v5m0 0V4.5a1.5 1.5 0 0 1 3 0V11m0 0V6a1.5 1.5 0 0 1 3 0v8a6 6 0 0 1-6 6h-1a6 6 0 0 1-5-3l-2-3a1.5 1.5 0 0 1 2.4-1.8L8 14"/>',swipe:'<path d="M4 12h16M14 6l6 6-6 6"/>',wave:'<path d="M3 12h2l2-6 4 12 3-9 2 3h5"/>',steam:'<path d="M8 4c-2 2 2 3 0 5s2 3 0 5M14 4c-2 2 2 3 0 5s2 3 0 5M4 19h16"/>',warn:'<path d="M12 4l9 16H3zM12 10v4M12 17v.5"/>',timer:'<circle cx="12" cy="13" r="7"/><path d="M12 9v4l3 2M9 3h6"/>',phone:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/>',exit:'<path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9"/>',reset:'<path d="M4 12a8 8 0 1 0 3-6.2M4 4v4h4"/>',play:'<path d="M7 5l12 7-12 7z"/>',tag:'<path d="M4 4h8l8 8-8 8-8-8zM8.5 8.5h.01"/>',corner:'<path d="M18 6L6 18M6 18h8M6 18v-8"/>'};const sv=k=>'<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">'+I[k]+'</svg>';const M={tour:'play',notes:'tag',next:'mic',double:'mic',palm:'hand',swipe:'swipe',noise:'wave',steam:'steam',false:'warn',two:'timer',call:'phone',away:'exit',reset:'reset'};document.querySelectorAll('.sim button').forEach(b=>{const k=M[b.dataset.s];if(k)b.insertAdjacentHTML('afterbegin',sv(k))});['hand','mic','wave','corner'].forEach((k,i)=>{const f=document.querySelectorAll('.fr')[i];if(f)f.insertAdjacentHTML('afterbegin','<div class="fi">'+sv(k)+'</div>')})})();
+document.querySelectorAll('nav[style]').forEach(n=>n.remove());
+init();
+</script></body></html>
